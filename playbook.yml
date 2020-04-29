@@ -1,0 +1,10 @@
+---
+- hosts: all
+  remote_user: "{{ username }}"
+  become: yes
+  roles:
+    - common
+    - access_point
+    - speed_test
+    - samba
+    - reboot

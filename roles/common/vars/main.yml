@@ -1,0 +1,10 @@
+---
+
+basic_packages:
+  - zsh
+  - ntp
+  - git
+  - vim
+  - dnsutils
+  - transmission-cli
+  - transmission-daemon

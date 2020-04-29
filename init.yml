@@ -1,0 +1,8 @@
+---
+# Run this first
+
+- hosts: all
+  remote_user: pi
+  become: yes
+  roles:
+    - init

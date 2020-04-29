@@ -1,0 +1,29 @@
+---
+
+- name: set static IP
+  copy:
+    src: dhcpcd.conf
+    dest: /etc/dhcpcd.conf
+    mode: 0664
+    owner: root
+    group: netdev
+
+- name: create new user
+  user:
+    name: "{{ username }}"
+    groups: sudo
+    append: yes
+
+- name: add authorized keys to new user
+  authorized_key:
+    user: "{{ username }}"
+    state: present
+    key: "https://github.com/{{ github_user }}.keys"
+
+- name: allow passwordless sudo for new user
+  template:
+    src: sudo.j2
+    dest: /etc/sudoers.d/020_passwordless
+
+- name: reboot
+  reboot:

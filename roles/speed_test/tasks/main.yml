@@ -1,0 +1,38 @@
+---
+
+- name: install necessary packages
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - nginx
+    - speedtest-cli
+
+- name: download project from github
+  git:
+    repo: "https://github.com/jakedecourcey/internet-speed-tracker.git"
+    dest: "/home/{{ username }}/internet-speed-tracker/"
+
+- name: move files to webserver
+  copy:
+    remote_src: yes
+    src: "/home/{{ username }}/internet-speed-tracker/web/"
+    dest: /var/www/html/
+
+- name: make script executable
+  file:
+    path: "/home/{{ username }}/internet-speed-tracker/scripts/data-collection.sh"
+    mode: '0755'
+
+- name: install cron job to collect data
+  cron:
+    name: speedtest
+    minute: "0"
+    job: "/home/{{ username }}/internet-speed-tracker/scripts/data-collection.sh"
+
+
+- name: make sure nginx is started
+  systemd:
+    name: nginx
+    state: started
+    enabled: yes

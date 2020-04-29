@@ -1,0 +1,54 @@
+---
+
+- name: delete default user
+  user:
+    name: pi
+    state: absent
+    remove: yes
+
+- name: install basic packages
+  apt:
+    name: "{{ basic_packages }}"
+    state: present
+    update_cache: yes
+
+- name: make zsh default shell for main user
+  user:
+    name: "{{ username }}"
+    shell: /bin/zsh
+
+- name: install youtube-dl
+  get_url: 
+    url: "https://yt-dl.org/downloads/latest/youtube-dl"
+    mode: "0755"
+    dest: "/usr/local/bin/youtube-dl"
+
+- name: download dotfiles
+  git:
+    repo: "https://github.com/jakedecourcey/dotfiles"
+    dest: "/home/{{ username }}/dotfiles"
+    force: yes
+
+- name: make dotfile executable
+  file:
+    path: "/home/{{ username }}/dotfiles/linux.sh"
+    mode: '0755'
+
+- name: install dotfiles
+  command: sh -c "/home/{{ username }}/dotfiles/linux.sh"
+
+- name: stop transmission
+  systemd:
+    name: transmission-daemon
+    state: stopped
+
+- name: configure transmission
+  template:
+    src: transmission.j2
+    dest: /etc/transmission-daemon/settings.json
+
+- name: start transmission daemon
+  systemd:
+    name: transmission-daemon
+    state: started
+    enabled: yes

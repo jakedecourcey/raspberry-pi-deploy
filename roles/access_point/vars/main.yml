@@ -1,0 +1,6 @@
+---
+
+ap_packages:
+  - dnsmasq
+  - hostapd
+  - openvpn

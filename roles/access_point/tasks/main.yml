@@ -1,0 +1,68 @@
+---
+
+- name: install required packages
+  apt:
+    name: "{{ ap_packages }}"
+    state: present
+
+- name: configure dhpcd
+  template:
+    src: dhcpcd.j2
+    dest: /etc/dhcpcd.conf
+  notify:
+    - restart dhcpcd
+
+- name: configure hostapd
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  loop:
+    - { src: 'hostapd.j2', dest: '/etc/hostapd/hostapd.conf' }
+    - { src: 'default-hostapd.j2', dest: '/etc/default/hostapd' }
+    - { src: 'init-hostapd.j2', dest: '/etc/init.d/hostapd' }
+  notify:
+    - restart hostapd
+
+- name: configure dnsmasq
+  template:
+    src: dnsmasq.j2
+    dest: /etc/dnsmasq.conf
+  notify:
+    - restart dnsmasq
+
+- name: configure openVPN
+  template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+  loop:
+    - { src: 'auth.j2', dest: '/etc/openvpn/auth.txt' }
+    - { src: 'default.j2', dest: '/etc/openvpn/default.conf' }
+    - { src: 'default-openvpn.j2', dest: '/etc/default/openvpn' }
+
+- name: configure routing
+  template:
+    src: sysctl.j2
+    dest: /etc/sysctl.conf
+  loop:
+    - { src: 'sysct.j2', dest: '/etc/sysctl.conf' }
+    - { src: 'iptables.j2', dest: '/etc/iptables.ipv4.nat' }
+    - { src: 'rc-local.j2', dest: '/etc/rc.local' }
+  notify:
+    - restart sysctl
+
+- name: disable generic wpa
+  systemd:
+    name: wpa_supplicant
+    enabled: no
+
+- name: enable services
+  systemd:
+    name: "{{ item }}"
+    masked: no
+    enabled: yes
+    state: started
+  loop:
+    - dhcpcd
+    - hostapd
+    - dnsmasq
+    - wpa_supplicant@wlan0
