@@ -29,10 +29,14 @@
     dest: "/home/{{ username }}/dotfiles"
     force: yes
 
-- name: make dotfile executable
+- name: set correct dotfile permissions
   file:
-    path: "/home/{{ username }}/dotfiles/linux.sh"
+    path: "/home/{{ username }}/dotfiles/"
+    state: directory
+    recurse: yes
     mode: '0755'
+    owner: jacob
+    group: jacob
 
 - name: install dotfiles
   command: sh -c "/home/{{ username }}/dotfiles/linux.sh"
